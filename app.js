@@ -1,8 +1,4 @@
-console.log("Entrega Final - CoderVision!")
-
-// Entidades---------------------------------------------------------------------
-
-class Pelicula {
+class Film {
   constructor(id, nombre, contenido, categoria, director, anio, disponibilidad, trailer, imagen) {
     this.id = id;
     this.nombre = nombre;
@@ -16,244 +12,229 @@ class Pelicula {
   }
 }
 
-//Variables-----------------------------------------------------------------------
+const films = [];
+const myList = [];
+const cardsContainer = document.getElementById("cardsId");
 
-let Peliculas = [];
-let Lista = [];
-let btninicio = $('#btninicio')
-let btnmilista = $('#btnmilista')
-let btnpelis = document.getElementById("btnpelis")
-let btnseries = document.getElementById("btnseries")
-let btnaccion = document.getElementById("btnaccion")
-let btnanimacion = document.getElementById("btnanimacion")
-let btnbiopic = document.getElementById("btnbiopic")
-let btnciencia = document.getElementById("btnciencia")
-let btncomedia = document.getElementById("btncomedia")
-let btndrama = document.getElementById("btndrama")
-let btnterror = document.getElementById("btnterror")
-let btnformulario = document.getElementById("btnformulario")
+const btnHome = $('#btninicio');
+const btnMyList = $('#btnmilista');
+const btnMovies = document.getElementById("btnpelis");
+const btnSeries = document.getElementById("btnseries");
+const btnAction = document.getElementById("btnaccion");
+const btnAnimation = document.getElementById("btnanimacion");
+const btnBiopic = document.getElementById("btnbiopic");
+const btnSciFi = document.getElementById("btnciencia");
+const btnComedy = document.getElementById("btncomedia");
+const btnDrama = document.getElementById("btndrama");
+const btnHorror = document.getElementById("btnterror");
+const btnForm = document.getElementById("btnformulario");
 
-//Titulo, escrito en Jquery con animacion
+$('#id1').fadeIn(3500);
+$('#id1').text("Bienvenid@s a CoderVisión!");
 
-let titulo = $('#id1').fadeIn(3500);
-$('#id1').text("Bienvenid@s a CoderVisión!")
+const createCardHTML = (film) => {
+  return `<div id="${film.id}" class="card">
+    <img src="${film.imagen}" class="card-img-top" onclick="startPlayback('${film.trailer}')">
+    <br>
+    <h5 class="card-title"><b>${film.nombre}</b></h5>
+    <p class="card-text">${film.contenido}-${film.categoria}</p>
+    <a href="#" class="btn btn-primary" onclick="addToList('${film.id}')">Agregar a mi lista</a>
+  </div>`;
+};
 
+const createListCardHTML = (film) => {
+  return `<div id="${film.id}" class="card">
+    <img src="${film.imagen}" class="card-img-top" onclick="startPlayback('${film.trailer}')">
+    <br>
+    <h5 class="card-title"><b>${film.nombre}</b></h5>
+    <p class="card-text">${film.contenido}-${film.categoria}</p>
+    <a href="#" class="btn btn-primary" onclick="removeFromList('${film.id}')">Quitar de mi Lista</a>
+  </div>`;
+};
 
-//Funciones-----------------------------------------------------------------------
+const removeChildren = (element) => {
+  while (element.hasChildNodes()) {
+    element.removeChild(element.lastChild);
+  }
+};
 
-//Llamo a mis titulos en el archivo json e imprimo todas las tarjetas
+const loadFilmsArray = async () => {
+  $('#id1').text("Bienvenid@s a CoderVisión!");
+  removeChildren(cardsContainer);
 
-function cargaDeArray() {
+  try {
+    const response = await fetch('films.json');
+    const data = await response.json();
+    
+    data.forEach(film => {
+      films.push(film);
+      cardsContainer.innerHTML += createCardHTML(film);
+    });
+  } catch (error) {
+    console.error('Error loading films:', error);
+  }
+};
 
-  let cardsId = document.getElementById("cardsId")
+loadFilmsArray();
 
-  $('#id1').text("Bienvenid@s a CoderVisión!")
+const printCards = () => {
+  removeChildren(cardsContainer);
+  $('#id1').text("Bienvenid@s a CoderVisión!");
 
-  remover(cardsId);
+  films.forEach(film => {
+    cardsContainer.innerHTML += createCardHTML(film);
+  });
+};
 
-  fetch('archivos.json').then(response =>
-    response.json().then(data => ({
-      data: data,
-      status: response.status,
-      
-    })
-    ).then(res => {
-
-
-      res.data.forEach(e => {
-        Peliculas.push(e)
-        cardsId.innerHTML += `<div  id =${e.id} class="card"  >
-                                <img src=${e.imagen} class="card-img-top" onclick="comenzarReproduccion('${e.trailer}')">
-                                <br>
-                                <h5 class="card-title"><b>${e.nombre}</b></h5>
-                                <p class="card-text">${e.contenido}-${e.categoria}</p>
-                                <a href="#" class="btn btn-primary"  onclick= "agregarALista('${e.id}')">Agregar a mi lista</a>
-                                </div>`
-      })
-    }))
+const printContent = (contentType) => {
+  removeChildren(cardsContainer);
+  const validTypes = ["Película", "Serie"];
   
-}
+  if (validTypes.includes(contentType)) {
+    $('#id1').text(contentType);
 
-
-//Inicializacion del sitio
-cargaDeArray()
-
-function imprimirCards() {
-
-  remover(cardsId);
-
-  let idImprimirPelis = document.getElementById("cardsId");
-
-
-  $('#id1').text("Bienvenid@s a CoderVisión!")
-
-  Peliculas.forEach(e => {
-
-    idImprimirPelis.innerHTML += `<div  id =${e.id} class="card"  >
-                                                <img src=${e.imagen} class="card-img-top" onclick="comenzarReproduccion('${e.trailer}')">
-                                                <br>
-                                                <h5 class="card-title"><b>${e.nombre}</b></h5>
-                                                <p class="card-text">${e.contenido}-${e.categoria}</p>
-                                                <a href="#" class="btn btn-primary"  onclick= "agregarALista('${e.id}')">Agregar a mi lista</a>
-                                                </div>`
-  })
-}
-
-//Funcion para poder mostrar solo las peliculas o solo las series
-
-function imprimirContenido(tipo) {
-
-  remover(cardsId);
-
-  let idImprimirPelis = document.getElementById("cardsId");
-
-  if (tipo == "Película" || tipo == "Serie") {
-
-    $('#id1').text(tipo)
-
-    Peliculas.forEach(e => {
-      if (e.contenido == tipo) {
-        idImprimirPelis.innerHTML += `<div  id =${e.id} class="card"  >
-                                                <img src=${e.imagen} class="card-img-top" onclick="comenzarReproduccion('${e.trailer}')">
-                                                <br>
-                                                <h5 class="card-title"><b>${e.nombre}</b></h5>
-                                                <p class="card-text">${e.contenido}-${e.categoria}</p>
-                                                <a href="#" class="btn btn-primary"  onclick= "agregarALista('${e.id}')">Agregar a mi lista</a>
-                                                </div>`
+    films.forEach(film => {
+      if (film.contenido === contentType) {
+        cardsContainer.innerHTML += createCardHTML(film);
       }
-    })
+    });
   }
+};
 
-}
+const printCategory = (category) => {
+  const validCategories = ["Terror", "Drama", "Accion", "Animacion", "Comedia", "Biopic", "Ciencia Ficcion"];
+  
+  if (validCategories.includes(category)) {
+    $('#id1').text(category);
+    cardsContainer.innerHTML = "";
 
-//Funcion para mostrar solo la categoria elegida    
-
-function imprimirCategoria(tipo) {
-
-  let idImprimirPelis = document.getElementById("cardsId");
-
-  if (tipo == "Terror" || tipo == "Drama" || tipo == "Accion" || tipo == "Animacion" || tipo == "Comedia" || tipo == "Biopic" || tipo == "Ciencia Ficcion") {
-
-    $('#id1').text(tipo)
-    idImprimirPelis.innerHTML = "";
-
-    Peliculas.forEach(e => {
-      if (e.categoria == tipo) {
-        idImprimirPelis.innerHTML += `<div  id =${e.id} class="card"  >
-                                                <img src=${e.imagen} class="card-img-top" onclick="comenzarReproduccion('${e.trailer}')">
-                                                <br>
-                                                <h5 class="card-title"><b>${e.nombre}</b></h5>
-                                                <p class="card-text">${e.contenido}-${e.categoria}</p>
-                                                <a href="#" class="btn btn-primary"  onclick= "agregarALista('${e.id}')">Agregar a mi lista</a>
-                                                </div>`
+    films.forEach(film => {
+      if (film.categoria === category) {
+        cardsContainer.innerHTML += createCardHTML(film);
       }
-    })
+    });
   }
-
-}
-
-//Creo una funcion para poder remover los child, poder borrar todas las tarjetas para los diferentes filtros
-
-
-function remover(myNode) {
-
-  while (myNode.hasChildNodes()) {
-    myNode.removeChild(myNode.lastChild);
-  }
-}
-
-
-//Funcion del scrolltop
-
-scrollTopButton('.scroll-top-btn');
+};
 
 function scrollTopButton(btn) {
-  const $ScrollBtn = $(btn);
+  const $scrollBtn = $(btn);
 
   $(window).scroll(function () {
-    let scrollTop = $(this).scrollTop();
+    const scrollTop = $(this).scrollTop();
+    scrollTop > 400 ? $scrollBtn.removeClass('hidden') : $scrollBtn.addClass('hidden');
+  });
 
-    scrollTop > 400 ? $ScrollBtn.removeClass('hidden') : $ScrollBtn.addClass('hidden');
-  })
-
-  $ScrollBtn.click(function () {
+  $scrollBtn.click(function () {
     window.scrollTo({
       behavior: 'smooth',
       top: 0
-    })
-  })
+    });
+  });
 }
 
-//Cada boton tiene asignado un filtro en particular
+scrollTopButton('.scroll-top-btn');
 
-$(btninicio).click(imprimirCards);
-$(btnImagen).click(imprimirCards);
-$(btnmilista).click(imprimirLista);
-$(btnpelis).click(() => { imprimirContenido("Película") });
-$(btnseries).click(() => { imprimirContenido("Serie") });
-$(btnaccion).click(() => { imprimirCategoria("Accion") });
-$(btnanimacion).click(() => { imprimirCategoria("Animacion") });
-$(btnbiopic).click(() => { imprimirCategoria("Biopic") });
-$(btnciencia).click(() => { imprimirCategoria("Ciencia Ficcion") });
-$(btncomedia).click(() => { imprimirCategoria("Comedia") });
-$(btndrama).click(() => { imprimirCategoria("Drama") });
-$(btnterror).click(() => { imprimirCategoria("Terror") });
-$(btnformulario).click(imprimirFormulario);
-
-//Buscador de titulos
-
-const searchbar = document.querySelector('#searchbar');
-const searchbutton = document.querySelector('#searchbutton');
-const result = document.querySelector('#cardsId')
-
-const searcher = () => {
-
-  result.innerHTML = '';
-  const text = searchbar.value.toLowerCase();
-
-  for (let Pelicula of Peliculas) {
-
-    let nombre = Pelicula.nombre.toLowerCase();
-    if (nombre.indexOf(text) !== -1) {
-
-      result.innerHTML += `<div  id =${Pelicula.id} class="card"  >
-                                  <img src=${Pelicula.imagen} class="card-img-top" onclick="comenzarReproduccion('${Pelicula.trailer}')">
-                                  <br>
-                                  <h5 class="card-title"><b>${Pelicula.nombre}</b></h5>
-                                  <p class="card-text">${Pelicula.contenido}-${Pelicula.categoria}</p>
-                                  <a href="#" class="btn btn-primary"  onclick= "agregarALista('${Pelicula.id}')">Agregar a mi lista</a>
-                                  </div>`
-
-    }
+const printList = () => {
+  if (myList.length === 0) {
+    swal({
+      title: "Error!",
+      text: "No hay elementos agregados a la lista",
+      icon: "error",
+    });
+    removeChildren(cardsContainer);
+    $('#id1').text("Mi Lista");
+    return;
   }
 
-  if (result.innerHTML === '') {
+  removeChildren(cardsContainer);
+  $('#id1').text("Mi Lista");
 
+  myList.forEach(film => {
+    cardsContainer.innerHTML += createListCardHTML(film);
+  });
+};
+
+const printForm = () => {
+  removeChildren(cardsContainer);
+  $('#id1').text("Dejanos tu mensaje");
+
+  cardsContainer.innerHTML += `
+    <section class="contact">
+      <div id="formulario" class="u-wrapper">
+        <div class="contact-content">
+          <form id="form" action="https://formspree.io/f/mgernele" method="POST" class="form">
+            <label for="name" class="formu">Nombre Completo <span>*</span></label>
+            <input name="name" required type="text" id="name" placeholder="nombre">
+            <label for="email" class="formu">Correo electrónico <span>*</span></label>
+            <input name="email" type="text" id="email" required placeholder="nombre@gmail.com">
+            <label for="message" class="formu">Mensaje</label>
+            <textarea id="message" name="message" cols="30" rows="10"></textarea>
+            <button id="botonenviar" type="submit" class="btn primary full">enviar mensaje</button>
+          </form>
+          <a href="mailto:arturogrottoli@gmail.com" id="idform"></a>
+        </div>
+      </div>
+    </section>`;
+};
+
+const searchBar = document.querySelector('#searchbar');
+const searchButton = document.querySelector('#searchbutton');
+
+const search = () => {
+  if (!searchBar) return;
+  
+  cardsContainer.innerHTML = '';
+  const searchText = searchBar.value.toLowerCase();
+
+  if (!searchText) {
+    printCards();
+    return;
+  }
+
+  const matchingFilms = films.filter(film => 
+    film.nombre.toLowerCase().includes(searchText)
+  );
+
+  if (matchingFilms.length === 0) {
     swal({
       title: "Error!",
       text: "No se ha encontrado ningun titulo con ese nombre",
       icon: "error",
     });
-
-
+    return;
   }
+
+  matchingFilms.forEach(film => {
+    cardsContainer.innerHTML += createCardHTML(film);
+  });
+};
+
+if (searchButton) {
+  searchButton.addEventListener('click', search);
+}
+if (searchBar) {
+  searchBar.addEventListener('keyup', search);
 }
 
-searchbutton.addEventListener('click', searcher)
-searchbar.addEventListener('keyup', searcher)
+$(btnHome).click(printCards);
+$('#btnImagen').click(printCards);
+$(btnMyList).click(printList);
+$(btnMovies).click(() => printContent("Película"));
+$(btnSeries).click(() => printContent("Serie"));
+$(btnAction).click(() => printCategory("Accion"));
+$(btnAnimation).click(() => printCategory("Animacion"));
+$(btnBiopic).click(() => printCategory("Biopic"));
+$(btnSciFi).click(() => printCategory("Ciencia Ficcion"));
+$(btnComedy).click(() => printCategory("Comedia"));
+$(btnDrama).click(() => printCategory("Drama"));
+$(btnHorror).click(() => printCategory("Terror"));
+$(btnForm).click(printForm);
 
-
-//Reproduccion de titulos (En este caso al no tener base de datos reproduzco su trailer de youtube)
-
-let comenzarReproduccion = (idReproducir) => {
-  let botonReproduc = Peliculas.filter(e => e.trailer == idReproducir)
-  window.location.href = (idReproducir)
+function startPlayback(trailerUrl) {
+  window.location.href = trailerUrl;
 }
 
-//Seleccion de tarjeta y agregar titulos a Mi Lista
-
-let agregarALista = (idLista) => {
-
+function addToList(filmId) {
   swal("Quiere agregar el titulo a su lista?", {
     buttons: {
       cancel: "Cancelar",
@@ -261,26 +242,21 @@ let agregarALista = (idLista) => {
         text: "Agregar",
         value: "agregar",
       },
-
     },
   })
     .then((value) => {
       switch (value) {
-
-
         case "agregar":
-          swal("Ok!", "Titulo agregado a la lista", "success");
-          //Meter un if para que no suba titulos repetidos  
-          let tituloEnlistado = Peliculas.filter(e => e.id == idLista)
+          const filmIdNum = Number(filmId);
+          const filmToAdd = films.find(film => film.id === filmIdNum);
 
-          if (tituloEnlistado[0].disponibilidad === true) {
-            Lista.push(tituloEnlistado[0])
-            tituloEnlistado[0].disponibilidad = false;
-            console.log(Lista)
+          if (filmToAdd && filmToAdd.disponibilidad === true) {
+            myList.push(filmToAdd);
+            filmToAdd.disponibilidad = false;
+            console.log(myList);
+            swal("Ok!", "Titulo agregado a la lista", "success");
             break;
-          }
-
-          else {
+          } else {
             swal("Error", "El titulo ya está en tu lista", "error");
             break;
           }
@@ -291,51 +267,7 @@ let agregarALista = (idLista) => {
     });
 }
 
-//imprime las peliculas agregadas a la lista
-
-function imprimirLista() {
-
-  if (Lista == '') {
-    swal({
-      title: "Error!",
-      text: "No hay elementos agregados a la lista",
-      icon: "error",
-    });
-    remover(cardsId);
-
-    let titulo = $('#id1');
-    $('#id1').text("Mi Lista")
-  } else {
-
-    remover(cardsId);
-
-    let titulo = $('#id1');
-    $('#id1').text("Mi Lista")
-
-    let idImprimirLista = document.getElementById("cardsId")
-
-
-    Lista.forEach(e => {
-
-
-
-      idImprimirLista.innerHTML += `<div  id =${e.id} class="card"  >
-                                    <img src=${e.imagen} class="card-img-top" onclick="comenzarReproduccion('${e.trailer}')">
-                                    <br>
-                                    <h5 class="card-title"><b>${e.nombre}</b></h5>
-                                    <p class="card-text">${e.contenido}-${e.categoria}</p>
-                                    <a href="#" class="btn btn-primary"  onclick= "quitarDeLista('${e.id}')">Quitar de mi Lista</a>
-                                    </div>  `
-
-
-    })
-  }
-}
-
-//Quita las peliculas que no quiero tener mas en la lista
-
-let quitarDeLista = (idLista) => {
-
+function removeFromList(filmId) {
   swal("Quiere quitar el titulo de su lista?", {
     buttons: {
       cancel: "Cancelar",
@@ -343,40 +275,27 @@ let quitarDeLista = (idLista) => {
         text: "Quitar",
         value: "quitar",
       },
-
     },
   })
     .then((value) => {
       switch (value) {
-
-
         case "quitar":
+          const filmIdNum = Number(filmId);
+          const filmIndex = myList.findIndex(film => film.id === filmIdNum);
+          const filmToRemove = myList[filmIndex];
 
-          const tituloQuitado = Lista.find(e => e.id == idLista);
-          const indexTituloQuitado = Lista.findIndex(e => e.id == idLista);
-
-          if (tituloQuitado.disponibilidad === false) {
-            Lista.splice(indexTituloQuitado, 1);
-            tituloQuitado.disponibilidad = true;
-            console.log(tituloQuitado);
+          if (filmToRemove && filmToRemove.disponibilidad === false) {
+            myList.splice(filmIndex, 1);
+            filmToRemove.disponibilidad = true;
+            console.log(filmToRemove);
             swal("Ok!", "Titulo quitado de la lista", "success");
 
+            removeChildren(cardsContainer);
 
-            remover(cardsId)
-
-            let idImprimirLista = document.getElementById("cardsId")
-            Lista.forEach(e => {
-
-              idImprimirLista.innerHTML += `<div  id =${e.id} class="card"  >
-                                                        <img src=${e.imagen} class="card-img-top" onclick="comenzarReproduccion('${e.trailer}')">
-                                                        <br>
-                                                        <h5 class="card-title"><b>${e.nombre}</b></h5>
-                                                        <p class="card-text">${e.contenido}-${e.categoria}</p>
-                                                        <a href="#" class="btn btn-primary"  onclick= "quitarDeLista('${e.id}')">Quitar de mi Lista</a>
-                                                        </div>  `
-            }
-            )
-            console.log(Lista)
+            myList.forEach(film => {
+              cardsContainer.innerHTML += createListCardHTML(film);
+            });
+            console.log(myList);
             break;
           }
 
@@ -386,46 +305,10 @@ let quitarDeLista = (idLista) => {
     });
 }
 
-//Funcion Formulario, utilizo una API llamada formspree
-
-function imprimirFormulario() {
-
-  remover(cardsId);
-  let titulo = $('#id1');
-  $('#id1').text("Dejanos tu mensaje")
-
-  let idImprimirPelis = document.getElementById("cardsId");
-  idImprimirPelis.innerHTML += `
-                <section class="contact">
-                <div id="formulario" class="u-wrapper">
-                <div class="contact-content">
-                <form id="form" action="https://formspree.io/f/mgernele" method="POST" class="form">
-                  <label for="name" class="formu">Nombre Completo <span>*</span></label>
-                  <input name="name" required type="text" id="name" placeholder="nombre">
-                  <label for="email" class="formu">Correo electrónico <span>*</span></label>
-                  <input name="email" type="text" id="email" required placeholder="nombre@gmail.com">
-                  <label for="message" class="formu">Mensaje</label>
-                  <textarea id="message" name="message" id="" cols="30" rows="10"></textarea>
-                  <button id="botonenviar" type="submit" class="btn primary full">enviar mensaje</button>
-                </form>
-                <a href="mailto:arturogrottoli@gmail.com" id="idform"></a>
-                </div>
-                </div>
-                </section>`
-
-
-
-}
-
-//Funcion para tener menu lateral en pantalla con menor resolucion
-
 document.querySelector('.menu-btn').addEventListener('click', () => {
   document.querySelector('.navbar .items').classList.toggle('show');
 });
 
-
 document.querySelector('.cancel-btn').addEventListener('click', () => {
   document.querySelector('.navbar .items').classList.toggle('show');
 });
-
-
